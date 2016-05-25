@@ -8,5 +8,6 @@ fun main(arg: Array<String>) {
     val config = LwjglApplicationConfiguration()
     config.width = 1920
     config.height = 1080
+    config.vSyncEnabled = true
     LwjglApplication(DefenseGame(), config)
 }
