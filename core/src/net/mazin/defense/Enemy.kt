@@ -1,10 +1,8 @@
 package net.mazin.defense
 
-import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.g2d.TextureRegion
-import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.actions.Actions.*
@@ -17,10 +15,10 @@ class Enemy(position: Vector2) : Actor() {
         this.setPosition(position.x, position.y)
         val tex = Texture("sprites.0.png")
         this.ship = TextureRegion(tex, 128, 128)
-        this.width = 128f
-        this.height = 128f
+        this.width = 64f
+        this.height = 64f
         this.setOrigin(Align.center)
-        //this.addAction(forever(rotateBy(10f, 0.1f)))
+        this.addAction(forever(rotateBy(10f, 0.1f)))
     }
 
     override fun act(delta: Float) {
@@ -31,18 +29,19 @@ class Enemy(position: Vector2) : Actor() {
     }
 
     override fun draw(batch: Batch?, parentAlpha: Float) {
-        if(batch == null) {
-            Gdx.app.log("Banana.draw", "batch is null :(")
-            return
-        } // TODO: do something better
-
-        // seems to already have a batch going. This could be a problem later?
-
-        batch.draw(this.ship, this.x, this.y, this.width / 2, this.height / 2, this.width, this.height, this.scaleX,
+        batch?.draw(this.ship, this.x, this.y, this.width / 2, this.height / 2, this.width, this.height, this.scaleX,
                 this.scaleY, this.rotation)
     }
 
+    fun goBoom() {
+        // TODO: scoring, explosion effect, etc
+        remove()
+    }
+
     fun follow(pathPoints: List<Vector2>): Actor? {
+        // todo: follow the path at a fixed rate
+        // probably by manually moving instead of using actions
+
         val me = Vector2(this.x, this.y)
         var points = pathPoints.toMutableList()
         var first = pathPoints.sortedBy { p -> me.dst(p) }.first()
@@ -55,7 +54,8 @@ class Enemy(position: Vector2) : Actor() {
             sorted.add(nextNearest)
         }
 
-        this.addAction(sequence( *sorted.map { p -> moveTo(p.x - this.originX, p.y - this.originY, 0.5f) }.toTypedArray() ))
+        this.addAction(sequence( *sorted.map { p -> moveTo(p.x - this.originX, p.y - this.originY, 1f) }.toTypedArray(),
+                run(Runnable { goBoom() })))
 
         return this;
     }
